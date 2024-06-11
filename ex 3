@@ -1,0 +1,106 @@
+import numpy as np
+
+class Node:
+    def __init__(self, feature=None, value=None, results=None, true_branch=None, false_branch=None):
+        self.feature = feature  # Feature index
+        self.value = value  # Value of the feature to split on
+        self.results = results  # None for nodes, actual value for leaves
+        self.true_branch = true_branch  # Branch for which the feature value is true
+        self.false_branch = false_branch  # Branch for which the feature value is false
+
+def unique_counts(data):
+    results = {}
+    for row in data:
+        r = row[-1]
+        if r not in results:
+            results[r] = 0
+        results[r] += 1
+    return results
+
+def entropy(data):
+    from math import log
+    results = unique_counts(data)
+    entropy = 0.0
+    for r in results.keys():
+        p = float(results[r]) / len(data)
+        entropy -= p * log(p, 2)
+    return entropy
+
+def divide_data(data, feature, value):
+    # Divides the data based on a feature and its value
+    true_rows = [row for row in data if row[feature] == value]
+    false_rows = [row for row in data if row[feature] != value]
+    return true_rows, false_rows
+
+def information_gain(current_entropy, true_branch, false_branch):
+    p = float(len(true_branch)) / (len(true_branch) + len(false_branch))
+    return current_entropy - p * entropy(true_branch) - (1 - p) * entropy(false_branch)
+
+def find_best_split(data):
+    best_gain = 0.0
+    best_criteria = None  # Feature index and value
+    best_sets = None  # Subsets of the data
+
+    current_entropy = entropy(data)
+    n_features = len(data[0]) - 1  # Number of features
+
+    for feature in range(n_features):  # For each feature
+        values = set([row[feature] for row in data])  # Unique values in the column
+        for value in values:  # For each value
+            true_rows, false_rows = divide_data(data, feature, value)
+            if len(true_rows) == 0 or len(false_rows) == 0:
+                continue
+            gain = information_gain(current_entropy, true_rows, false_rows)
+            if gain > best_gain:
+                best_gain = gain
+                best_criteria = (feature, value)
+                best_sets = (true_rows, false_rows)
+
+    return best_gain, best_criteria, best_sets
+
+def build_tree(data):
+    gain, criteria, sets = find_best_split(data)
+    if gain == 0:
+        return Node(results=unique_counts(data))
+    true_branch = build_tree(sets[0])
+    false_branch = build_tree(sets[1])
+    return Node(feature=criteria[0], value=criteria[1], true_branch=true_branch, false_branch=false_branch)
+
+def classify(row, node):
+    if node.results is not None:
+        return node.results
+    else:
+        branch = None
+        if isinstance(row[node.feature], int) or isinstance(row[node.feature], float):
+            if row[node.feature] >= node.value:
+                branch = node.true_branch
+            else:
+                branch = node.false_branch
+        else:
+            if row[node.feature] == node.value:
+                branch = node.true_branch
+            else:
+                branch = node.false_branch
+        return classify(row, branch)
+
+def print_tree(node, indent=''):
+    if node.results is not None:
+        print(indent + str(node.results))
+    else:
+        print(indent + 'Feature ' + str(node.feature) + ' : ' + str(node.value) + '? ')
+        print(indent + 'True->')
+        print_tree(node.true_branch, indent + '  ')
+        print(indent + 'False->')
+        print_tree(node.false_branch, indent + '  ')
+
+# Sample usage
+dataset = [
+    ['Green', 3, 'Apple'],
+    ['Yellow', 3, 'Apple'],
+    ['Red', 1, 'Grape'],
+    ['Red', 1, 'Grape'],
+    ['Yellow', 3, 'Lemon']
+]
+
+tree = build_tree(dataset)
+print_tree(tree)
