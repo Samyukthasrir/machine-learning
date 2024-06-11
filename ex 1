@@ -1,0 +1,37 @@
+import csv
+
+def find_s_algorithm(data):
+    # Initialize the most specific hypothesis
+    hypothesis = ['0'] * (len(data[0]) - 1)  # Initialize with '?' for each attribute
+    
+    # Iterate over each training example
+    for example in data:
+        if example[-1] == 'Yes':  # If the example is positive
+            for i in range(len(hypothesis)):
+                if hypothesis[i] == '0':
+                    hypothesis[i] = example[i]  # Update hypothesis with the attribute value
+                elif hypothesis[i] != example[i]:
+                    hypothesis[i] = '?'  # If inconsistent, generalize with '?'
+    return hypothesis
+
+def load_data_from_csv(filename):
+    data = []
+    with open(filename, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            data.append(row)
+    return data
+
+def main():
+    # Load data from CSV file
+    filename = 'training_data.csv'
+    data = load_data_from_csv(filename)
+    
+    # Run FIND-S algorithm
+    hypothesis = find_s_algorithm(data)
+    
+    # Print the most specific hypothesis
+    print("The most specific hypothesis is:", hypothesis)
+
+if _name_ == "_main_":
+    main()
