@@ -1,0 +1,72 @@
+import numpy as np
+
+def expectation(data, mu, sigma):
+    """
+    E-step: Calculate the expectation of the complete data log-likelihood
+    """
+    n = len(data)
+    k = len(mu)
+    gamma = np.zeros((n, k))
+    
+    for i in range(n):
+        for j in range(k):
+            gamma[i, j] = (
+                (1 / np.sqrt(2 * np.pi * sigma[j])) * 
+                np.exp(-0.5 * ((data[i] - mu[j]) ** 2) / sigma[j])
+            )
+    
+    gamma /= np.sum(gamma, axis=1, keepdims=True)
+    
+    return gamma
+
+def maximization(data, gamma):
+    """
+    M-step: Update parameters based on current estimates
+    """
+    n, k = gamma.shape
+    mu = np.sum(gamma * data[:, np.newaxis], axis=0) / np.sum(gamma, axis=0)
+    sigma = np.sum(
+        gamma * ((data[:, np.newaxis] - mu) ** 2), axis=0
+    ) / np.sum(gamma, axis=0)
+    
+    return mu, sigma
+
+def em_algorithm(data, k, max_iters=100, tol=1e-6):
+    """
+    EM algorithm to estimate parameters of a Gaussian Mixture Model
+    """
+    # Initialize parameters randomly
+    mu = np.random.rand(k) * (max(data) - min(data)) + min(data)
+    sigma = np.random.rand(k)
+    
+    for _ in range(max_iters):
+        old_mu = mu.copy()
+        
+        # E-step
+        gamma = expectation(data, mu, sigma)
+        
+        # M-step
+        mu, sigma = maximization(data, gamma)
+        
+        # Check for convergence
+        if np.linalg.norm(mu - old_mu) < tol:
+            break
+    
+    return mu, sigma
+
+# Example usage
+if __name__ == "__main__":
+    # Generate some sample data
+    np.random.seed(0)
+    data = np.concatenate([
+        np.random.normal(loc=5, scale=1, size=1000),
+        np.random.normal(loc=10, scale=2, size=1000)
+    ])
+    
+    # Number of clusters
+    k = 2
+    
+    # Run EM algorithm
+    estimated_mu, estimated_sigma = em_algorithm(data, k)
+    print("Estimated mu:", estimated_mu)
+    print("Estimated sigma:", estimated_sigma)
