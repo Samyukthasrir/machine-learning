@@ -27,7 +27,6 @@ def entropy(data):
     return entropy
 
 def divide_data(data, feature, value):
-    # Divides the data based on a feature and its value
     true_rows = [row for row in data if row[feature] == value]
     false_rows = [row for row in data if row[feature] != value]
     return true_rows, false_rows
