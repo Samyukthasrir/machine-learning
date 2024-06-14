@@ -3,22 +3,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 
-# Sample dataset (replace with your data)
-# Assume X contains features and y contains labels (0 for bad credit, 1 for good credit)
 X = np.array([[50000, 0.2, 0.3], [80000, 0.1, 0.2], [30000, 0.4, 0.5], [60000, 0.3, 0.4]])
 y = np.array([1, 1, 0, 1])
 
-# Split data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Train logistic regression model
 model = LogisticRegression()
 model.fit(X_train, y_train)
 
-# Predict on test data
 y_pred = model.predict(X_test)
 
-# Evaluate the model
 accuracy = accuracy_score(y_test, y_pred)
 report = classification_report(y_test, y_pred)
 
