@@ -19,21 +19,11 @@ class KNN:
         k_nearest_labels = [self.y_train[i] for i in k_indices]
         most_common = Counter(k_nearest_labels).most_common(1)
         return most_common[0][0]
-
-# Example usage:
 if __name__ == "__main__":
-    # Sample data
     X_train = np.array([[1, 2], [1.5, 1.8], [5, 8], [8, 8], [1, 0.6], [9, 11]])
     y_train = np.array([0, 0, 1, 1, 0, 1])
-
-    # Initialize and train the KNN classifier
     knn = KNN(k=2)
     knn.fit(X_train, y_train)
-
-    # Test data
     X_test = np.array([[2, 3], [6, 9], [1, 1], [10, 12]])
-
-    # Make predictions
     predictions = knn.predict(X_test)
-
     print("Predictions:", predictions)
