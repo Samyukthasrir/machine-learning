@@ -1,25 +1,15 @@
 import numpy as np
 import pandas as pd
-
-# Load data from CSV file
 def load_data(filename):
     return pd.read_csv(filename)
-
-# Candidate-Elimination algorithm
 def candidate_elimination(examples):
-    # Initialize G (set of most general hypotheses) and S (set of most specific hypotheses)
     G = set()
     S = set()
-    # Initialize G with the most general hypothesis
     G.add(('?',) * (len(examples.columns) - 1))
-    # Initialize S with the most specific hypothesis
     S.add(('0',) * (len(examples.columns) - 1))
-    
-    # Iterate over examples
     for index, row in examples.iterrows():
         x = tuple(row[:-1])  # Input attributes
         y = row[-1]  # Output attribute
         
         if y == 'Y':  # If the example is positive
-            # Remove from G any hypothesis that is not consistent with x
             G = {g for
